@@ -23,7 +23,7 @@ class CalculatorButtons extends StatelessWidget {
       child: Container(
         alignment: Alignment.center,
         height: 80,
-        width: btnText == '=' ? width * 0.42 : 80,
+        width: btnText == '=' ? width * 0.45 : 80,
         decoration: BoxDecoration(
           color: btnColor,
           borderRadius: BorderRadius.circular(50),
