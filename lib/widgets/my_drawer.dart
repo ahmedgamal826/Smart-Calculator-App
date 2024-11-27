@@ -7,7 +7,9 @@ class MyDrawer extends StatelessWidget {
   final Function toggleDarkMode;
   final List<HistoryItem> history;
   final bool isSoundEnabled;
+  final bool isLongSoundEnabled;
   final Function toggleSound;
+  final Function toogleLongSoundEnabled;
   Function(int) onDelete;
 
   MyDrawer({
@@ -18,6 +20,8 @@ class MyDrawer extends StatelessWidget {
     required this.isSoundEnabled,
     required this.toggleSound,
     required this.onDelete,
+    required this.isLongSoundEnabled,
+    required this.toogleLongSoundEnabled,
   }) : super(key: key);
 
   @override
@@ -39,7 +43,6 @@ class MyDrawer extends StatelessWidget {
                     'assets/images/logo2.png',
                     height: height * 0.11,
                   ),
-                  const SizedBox(height: 10),
                   const Text(
                     'Smart Calculator',
                     style: TextStyle(
@@ -100,6 +103,19 @@ class MyDrawer extends StatelessWidget {
             },
           ),
           const Divider(color: Colors.grey),
+          ListTile(
+            title: const Text(
+              'Long Pressed',
+              style: TextStyle(fontSize: 18),
+            ),
+            leading: Icon(
+              isLongSoundEnabled ? Icons.volume_up : Icons.volume_off,
+              color: isLongSoundEnabled ? Colors.green : Colors.red,
+            ),
+            onTap: () {
+              toogleLongSoundEnabled();
+            },
+          ),
         ],
       ),
     );

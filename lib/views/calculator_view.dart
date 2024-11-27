@@ -12,7 +12,6 @@ import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalculatorView extends StatefulWidget {
@@ -29,6 +28,7 @@ class _HomePageViewState extends State<CalculatorView> {
   String result = '0';
   final FlutterTts flutterTts = FlutterTts();
   bool isSoundEnabled = true;
+  bool isLongSoundEnabled = true;
   bool isDarkMode = false;
   List<HistoryItem> history = [];
 
@@ -43,6 +43,7 @@ class _HomePageViewState extends State<CalculatorView> {
     setState(() {
       isDarkMode = prefs.getBool('isDarkMode') ?? false;
       isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
+      isLongSoundEnabled = prefs.getBool('isLongSoundEnabled') ?? true; //
       List<String>? historyJson = prefs.getStringList('history');
       if (historyJson != null) {
         history = historyJson
@@ -64,6 +65,7 @@ class _HomePageViewState extends State<CalculatorView> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isDarkMode', isDarkMode);
     prefs.setBool('isSoundEnabled', isSoundEnabled);
+    prefs.setBool('isLongSoundEnabled', isLongSoundEnabled);
     List<String> historyJson =
         history.map((item) => jsonEncode(item.toMap())).toList();
 
@@ -100,6 +102,29 @@ class _HomePageViewState extends State<CalculatorView> {
 
   buttonPressed(String btnText) {
     setState(() {
+      if (isSoundEnabled) {
+        if (btnText == '0') playSound('audios/0.mp3');
+        if (btnText == '1') playSound('audios/1.mp3');
+        if (btnText == '2') playSound('audios/2.mp3');
+        if (btnText == '3') playSound('audios/3.mp3');
+        if (btnText == '4') playSound('audios/4.mp3');
+        if (btnText == '5') playSound('audios/5.mp3');
+        if (btnText == '6') playSound('audios/6.mp3');
+        if (btnText == '7') playSound('audios/7.mp3');
+        if (btnText == '8') playSound('audios/8.mp3');
+        if (btnText == '9') playSound('audios/9.mp3');
+        if (btnText == 'AC') playSound('audios/AC.mp3');
+        if (btnText == '⌫') playSound('audios/x.mp3');
+        if (btnText == '%') playSound('audios/%.mp3');
+        if (btnText == '÷') playSound('audios/div.mp3');
+        if (btnText == 'X') playSound('audios/mul.mp3');
+        if (btnText == '-') playSound('audios/-.mp3');
+        if (btnText == '+') playSound('audios/+.mp3');
+        if (btnText == '=') playSound('audios/=.mp3');
+        if (btnText == '.') playSound('audios/..mp3');
+      }
+
+      // باقي الكود لتنفيذ العمليات الحسابية
       if (btnText == 'AC') {
         equation = '0';
         result = '0';
@@ -133,8 +158,15 @@ class _HomePageViewState extends State<CalculatorView> {
       } else {
         equation = equation == '0' ? btnText : equation + btnText;
       }
+    });
+  }
 
-      if (isSoundEnabled) {
+  void onLongPress(String btnText) {
+    if (isLongSoundEnabled) {
+      playSound('audios/on_pressed.mp3');
+
+      Future.delayed(const Duration(seconds: 1), () {
+        // تشغيل الصوت الثاني (الصوت الخاص بالزر)
         if (btnText == '0') playSound('audios/0.mp3');
         if (btnText == '1') playSound('audios/1.mp3');
         if (btnText == '2') playSound('audios/2.mp3');
@@ -154,15 +186,22 @@ class _HomePageViewState extends State<CalculatorView> {
         if (btnText == '+') playSound('audios/+.mp3');
         if (btnText == '=') playSound('audios/=.mp3');
         if (btnText == '.') playSound('audios/..mp3');
-      }
-    });
+      });
+    }
   }
 
   void toggleSound() {
     setState(() {
       isSoundEnabled = !isSoundEnabled;
+      savePreferences();
     });
-    savePreferences();
+  }
+
+  void toggleLongSoundEnabled() {
+    setState(() {
+      isLongSoundEnabled = !isLongSoundEnabled;
+      savePreferences();
+    });
   }
 
   void toggleDarkMode(bool value) {
@@ -196,10 +235,12 @@ class _HomePageViewState extends State<CalculatorView> {
       drawer: MyDrawer(
         onDelete: deleteHistory,
         isSoundEnabled: isSoundEnabled,
+        isLongSoundEnabled: isLongSoundEnabled,
         isDarkMode: isDarkMode,
         toggleDarkMode: toggleDarkMode,
         history: history,
         toggleSound: toggleSound,
+        toogleLongSoundEnabled: toggleLongSoundEnabled,
       ),
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white, size: 30),
@@ -231,7 +272,11 @@ class _HomePageViewState extends State<CalculatorView> {
             ),
             const SizedBox(height: 20),
             ResultWidget(isDarkMode: isDarkMode, result: result),
-            CalculatorGrid(buttonPressed: buttonPressed)
+            CalculatorGrid(
+              buttonPressed: buttonPressed,
+              onLongPress: onLongPress,
+              isLongPressEnabled: isLongSoundEnabled,
+            )
           ],
         ),
       ),
