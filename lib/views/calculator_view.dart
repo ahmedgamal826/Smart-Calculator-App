@@ -28,7 +28,7 @@ class _HomePageViewState extends State<CalculatorView> {
   String result = '0';
   final FlutterTts flutterTts = FlutterTts();
   bool isSoundEnabled = true;
-  bool isLongSoundEnabled = true;
+  bool isLongEnabled = true;
   bool isDarkMode = false;
   List<HistoryItem> history = [];
 
@@ -43,7 +43,7 @@ class _HomePageViewState extends State<CalculatorView> {
     setState(() {
       isDarkMode = prefs.getBool('isDarkMode') ?? false;
       isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
-      isLongSoundEnabled = prefs.getBool('isLongSoundEnabled') ?? true; //
+      isLongEnabled = prefs.getBool('isLongSoundEnabled') ?? true;
       List<String>? historyJson = prefs.getStringList('history');
       if (historyJson != null) {
         history = historyJson
@@ -65,7 +65,7 @@ class _HomePageViewState extends State<CalculatorView> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isDarkMode', isDarkMode);
     prefs.setBool('isSoundEnabled', isSoundEnabled);
-    prefs.setBool('isLongSoundEnabled', isLongSoundEnabled);
+    prefs.setBool('isLongSoundEnabled', isLongEnabled);
     List<String> historyJson =
         history.map((item) => jsonEncode(item.toMap())).toList();
 
@@ -103,28 +103,96 @@ class _HomePageViewState extends State<CalculatorView> {
   buttonPressed(String btnText) {
     setState(() {
       if (isSoundEnabled) {
-        if (btnText == '0') playSound('audios/0.mp3');
-        if (btnText == '1') playSound('audios/1.mp3');
-        if (btnText == '2') playSound('audios/2.mp3');
-        if (btnText == '3') playSound('audios/3.mp3');
-        if (btnText == '4') playSound('audios/4.mp3');
-        if (btnText == '5') playSound('audios/5.mp3');
-        if (btnText == '6') playSound('audios/6.mp3');
-        if (btnText == '7') playSound('audios/7.mp3');
-        if (btnText == '8') playSound('audios/8.mp3');
-        if (btnText == '9') playSound('audios/9.mp3');
-        if (btnText == 'AC') playSound('audios/AC.mp3');
-        if (btnText == '⌫') playSound('audios/x.mp3');
-        if (btnText == '%') playSound('audios/%.mp3');
-        if (btnText == '÷') playSound('audios/div.mp3');
-        if (btnText == 'X') playSound('audios/mul.mp3');
-        if (btnText == '-') playSound('audios/-.mp3');
-        if (btnText == '+') playSound('audios/+.mp3');
-        if (btnText == '=') playSound('audios/=.mp3');
-        if (btnText == '.') playSound('audios/..mp3');
+        if (isLongEnabled == true) {
+          playSound('audios/on_pressed.mp3');
+        }
+
+        Future.delayed(Duration(milliseconds: !isLongEnabled ? 100 : 900), () {
+          if (btnText == '0') playSound('audios/0.mp3');
+          if (btnText == '1') playSound('audios/1.mp3');
+          if (btnText == '2') playSound('audios/2.mp3');
+          if (btnText == '3') playSound('audios/3.mp3');
+          if (btnText == '4') playSound('audios/4.mp3');
+          if (btnText == '5') playSound('audios/5.mp3');
+          if (btnText == '6') playSound('audios/6.mp3');
+          if (btnText == '7') playSound('audios/7.mp3');
+          if (btnText == '8') playSound('audios/8.mp3');
+          if (btnText == '9') playSound('audios/9.mp3');
+          if (btnText == 'AC') playSound('audios/AC.mp3');
+          if (btnText == '⌫') playSound('audios/remove_digit.mp3');
+          if (btnText == '%') playSound('audios/%.mp3');
+          if (btnText == '÷') playSound('audios/div.mp3');
+          if (btnText == 'X') playSound('audios/mul.mp3');
+          if (btnText == '-') playSound('audios/-.mp3');
+          if (btnText == '+') playSound('audios/+.mp3');
+          if (btnText == '=') playSound('audios/=.mp3');
+          if (btnText == '.') playSound('audios/..mp3');
+        });
+      }
+      if (!isLongEnabled) {
+        if (btnText == 'AC') {
+          equation = '0';
+          result = '0';
+          showPasteButton = true;
+        } else if (btnText == '⌫') {
+          equation = equation.substring(0, equation.length - 1);
+          if (equation == '') equation = '0';
+        } else if (btnText == '=') {
+          expression = equation;
+          expression = expression.replaceAll('X', '*');
+          expression = expression.replaceAll('÷', '/');
+
+          try {
+            Parser p = Parser();
+            Expression exp = p.parse(expression);
+            ContextModel cm = ContextModel();
+
+            result = '${exp.evaluate(EvaluationType.REAL, cm)}';
+
+            speakResultWithDelay(result);
+            String currentTime =
+                DateFormat('yyyy-MM-dd hh:mm a').format(DateTime.now());
+
+            history.add(HistoryItem(
+                equation: equation, result: result, time: currentTime));
+
+            savePreferences();
+          } catch (e) {
+            result = 'خطأ';
+          }
+        } else {
+          equation = equation == '0' ? btnText : equation + btnText;
+        }
+      }
+    });
+  }
+
+  void onLongPress(String btnText) {
+    setState(() {
+      if (isSoundEnabled) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (btnText == '0') playSound('audios/0.mp3');
+          if (btnText == '1') playSound('audios/1.mp3');
+          if (btnText == '2') playSound('audios/2.mp3');
+          if (btnText == '3') playSound('audios/3.mp3');
+          if (btnText == '4') playSound('audios/4.mp3');
+          if (btnText == '5') playSound('audios/5.mp3');
+          if (btnText == '6') playSound('audios/6.mp3');
+          if (btnText == '7') playSound('audios/7.mp3');
+          if (btnText == '8') playSound('audios/8.mp3');
+          if (btnText == '9') playSound('audios/9.mp3');
+          if (btnText == 'AC') playSound('audios/AC.mp3');
+          if (btnText == '⌫') playSound('audios/remove_digit.mp3');
+          if (btnText == '%') playSound('audios/%.mp3');
+          if (btnText == '÷') playSound('audios/div.mp3');
+          if (btnText == 'X') playSound('audios/mul.mp3');
+          if (btnText == '-') playSound('audios/-.mp3');
+          if (btnText == '+') playSound('audios/+.mp3');
+          if (btnText == '=') playSound('audios/=.mp3');
+          if (btnText == '.') playSound('audios/..mp3');
+        });
       }
 
-      // باقي الكود لتنفيذ العمليات الحسابية
       if (btnText == 'AC') {
         equation = '0';
         result = '0';
@@ -144,13 +212,13 @@ class _HomePageViewState extends State<CalculatorView> {
 
           result = '${exp.evaluate(EvaluationType.REAL, cm)}';
 
+          speakResultWithDelay(result);
           String currentTime =
               DateFormat('yyyy-MM-dd hh:mm a').format(DateTime.now());
 
           history.add(HistoryItem(
               equation: equation, result: result, time: currentTime));
 
-          speakResultWithDelay(result);
           savePreferences();
         } catch (e) {
           result = 'خطأ';
@@ -159,35 +227,6 @@ class _HomePageViewState extends State<CalculatorView> {
         equation = equation == '0' ? btnText : equation + btnText;
       }
     });
-  }
-
-  void onLongPress(String btnText) {
-    if (isLongSoundEnabled) {
-      playSound('audios/on_pressed.mp3');
-
-      Future.delayed(const Duration(seconds: 1), () {
-        // تشغيل الصوت الثاني (الصوت الخاص بالزر)
-        if (btnText == '0') playSound('audios/0.mp3');
-        if (btnText == '1') playSound('audios/1.mp3');
-        if (btnText == '2') playSound('audios/2.mp3');
-        if (btnText == '3') playSound('audios/3.mp3');
-        if (btnText == '4') playSound('audios/4.mp3');
-        if (btnText == '5') playSound('audios/5.mp3');
-        if (btnText == '6') playSound('audios/6.mp3');
-        if (btnText == '7') playSound('audios/7.mp3');
-        if (btnText == '8') playSound('audios/8.mp3');
-        if (btnText == '9') playSound('audios/9.mp3');
-        if (btnText == 'AC') playSound('audios/AC.mp3');
-        if (btnText == '⌫') playSound('audios/x.mp3');
-        if (btnText == '%') playSound('audios/%.mp3');
-        if (btnText == '÷') playSound('audios/div.mp3');
-        if (btnText == 'X') playSound('audios/mul.mp3');
-        if (btnText == '-') playSound('audios/-.mp3');
-        if (btnText == '+') playSound('audios/+.mp3');
-        if (btnText == '=') playSound('audios/=.mp3');
-        if (btnText == '.') playSound('audios/..mp3');
-      });
-    }
   }
 
   void toggleSound() {
@@ -199,7 +238,7 @@ class _HomePageViewState extends State<CalculatorView> {
 
   void toggleLongSoundEnabled() {
     setState(() {
-      isLongSoundEnabled = !isLongSoundEnabled;
+      isLongEnabled = !isLongEnabled;
       savePreferences();
     });
   }
@@ -235,7 +274,7 @@ class _HomePageViewState extends State<CalculatorView> {
       drawer: MyDrawer(
         onDelete: deleteHistory,
         isSoundEnabled: isSoundEnabled,
-        isLongSoundEnabled: isLongSoundEnabled,
+        isLongSoundEnabled: isLongEnabled,
         isDarkMode: isDarkMode,
         toggleDarkMode: toggleDarkMode,
         history: history,
@@ -275,7 +314,7 @@ class _HomePageViewState extends State<CalculatorView> {
             CalculatorGrid(
               buttonPressed: buttonPressed,
               onLongPress: onLongPress,
-              isLongPressEnabled: isLongSoundEnabled,
+              isLongPressEnabled: isLongEnabled,
             )
           ],
         ),
