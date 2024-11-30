@@ -27,38 +27,45 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+
     return Drawer(
+      width: width * 0.75,
       backgroundColor: Colors.white,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.deepOrangeAccent[100],
+          Container(
+            color: Colors.deepOrangeAccent[100],
+            padding: EdgeInsets.symmetric(
+              vertical: height * 0.03,
+              horizontal: width * 0.04,
             ),
-            child: Center(
-              child: Column(
-                children: [
-                  Image.asset(
+            child: Column(
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Image.asset(
                     'assets/images/logo2.png',
-                    height: height * 0.11,
+                    fit: BoxFit.contain,
                   ),
-                  const Text(
-                    'Smart Calculator',
-                    style: TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                ),
+                Text(
+                  'Smart Calculator',
+                  style: TextStyle(
+                    fontSize: width * 0.05,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
           ListTile(
-            title: const Text(
+            title: Text(
               'Light / Dark Mode',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: width * 0.04),
             ),
             trailing: Switch(
               value: isDarkMode,
@@ -68,12 +75,13 @@ class MyDrawer extends StatelessWidget {
           ),
           const Divider(color: Colors.grey),
           ListTile(
-            title: const Text(
+            title: Text(
               'History',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: width * 0.04),
             ),
-            leading: const Icon(
+            leading: Icon(
               Icons.history,
+              size: width * 0.05,
               color: Colors.black,
             ),
             onTap: () {
@@ -82,12 +90,13 @@ class MyDrawer extends StatelessWidget {
           ),
           const Divider(color: Colors.grey),
           ListTile(
-            title: const Text(
+            title: Text(
               'Sound',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: width * 0.04),
             ),
             leading: Icon(
               isSoundEnabled ? Icons.volume_up : Icons.volume_off,
+              size: width * 0.05,
               color: isSoundEnabled ? Colors.green : Colors.red,
             ),
             onTap: () {
@@ -96,12 +105,13 @@ class MyDrawer extends StatelessWidget {
           ),
           const Divider(color: Colors.grey),
           ListTile(
-            title: const Text(
+            title: Text(
               'Long Pressed',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: width * 0.04),
             ),
             leading: Icon(
               isLongSoundEnabled ? Icons.remove_red_eye : Icons.visibility_off,
+              size: width * 0.05,
               color: isLongSoundEnabled ? Colors.green : Colors.red,
             ),
             onTap: () {
