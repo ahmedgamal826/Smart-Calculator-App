@@ -1,4 +1,4 @@
-import 'package:calculator_app_task1/widgets/calculator_buttons.dart';
+import 'package:calculator_app_task1/features/home/presentation/views/widgets/calculator_buttons.dart';
 import 'package:flutter/material.dart';
 
 class CalculatorGrid extends StatefulWidget {

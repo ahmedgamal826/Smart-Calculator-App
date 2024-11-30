@@ -1,18 +1,18 @@
-import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:calculator_app_task1/models/history_model.dart';
-import 'package:calculator_app_task1/widgets/calculator_grid.dart';
-import 'package:calculator_app_task1/widgets/equation_widget.dart';
-import 'package:calculator_app_task1/widgets/my_drawer.dart';
-import 'package:calculator_app_task1/widgets/paste_button.dart';
-import 'package:calculator_app_task1/widgets/result_widget.dart';
+import 'package:calculator_app_task1/features/history/data/models/history_model.dart';
+import 'package:calculator_app_task1/features/home/data/services/audio_service.dart';
+import 'package:calculator_app_task1/features/home/data/services/preferences_service.dart';
+import 'package:calculator_app_task1/features/home/presentation/views/widgets/calculator_grid.dart';
+import 'package:calculator_app_task1/features/home/presentation/views/widgets/equation_widget.dart';
+import 'package:calculator_app_task1/core/widgets/my_drawer.dart';
+import 'package:calculator_app_task1/features/home/presentation/views/widgets/paste_button.dart';
+import 'package:calculator_app_task1/features/home/presentation/views/widgets/result_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CalculatorView extends StatefulWidget {
   const CalculatorView({super.key});
@@ -22,6 +22,9 @@ class CalculatorView extends StatefulWidget {
 }
 
 class _HomePageViewState extends State<CalculatorView> {
+  final AudioService audioService = AudioService(); // Using AudioHelper
+  final PreferencesService _preferencesService = PreferencesService();
+
   bool showPasteButton = true;
   String equation = '0';
   String expression = '';
@@ -38,38 +41,23 @@ class _HomePageViewState extends State<CalculatorView> {
     loadPreferences();
   }
 
-  loadPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> loadPreferences() async {
+    final prefs = await _preferencesService.loadPreferences();
     setState(() {
-      isDarkMode = prefs.getBool('isDarkMode') ?? false;
-      isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
-      isLongEnabled = prefs.getBool('isLongSoundEnabled') ?? true;
-      List<String>? historyJson = prefs.getStringList('history');
-      if (historyJson != null) {
-        history = historyJson
-            .map(
-              (item) => HistoryItem.fromMap(
-                Map<String, dynamic>.from(
-                  jsonDecode(item),
-                ),
-              ),
-            )
-            .toList();
-      } else {
-        history = [];
-      }
+      isDarkMode = prefs['isDarkMode'];
+      isSoundEnabled = prefs['isSoundEnabled'];
+      isLongEnabled = prefs['isLongEnabled'];
+      history = prefs['history'];
     });
   }
 
-  savePreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', isDarkMode);
-    prefs.setBool('isSoundEnabled', isSoundEnabled);
-    prefs.setBool('isLongSoundEnabled', isLongEnabled);
-    List<String> historyJson =
-        history.map((item) => jsonEncode(item.toMap())).toList();
-
-    prefs.setStringList('history', historyJson);
+  Future<void> savePreferences() async {
+    await _preferencesService.savePreferences(
+      isDarkMode: isDarkMode,
+      isSoundEnabled: isSoundEnabled,
+      isLongEnabled: isLongEnabled,
+      history: history,
+    );
   }
 
   void playSound(String soundPath) async {
@@ -107,27 +95,7 @@ class _HomePageViewState extends State<CalculatorView> {
           playSound('audios/on_pressed.mp3');
         }
 
-        Future.delayed(Duration(milliseconds: !isLongEnabled ? 100 : 900), () {
-          if (btnText == '0') playSound('audios/0.mp3');
-          if (btnText == '1') playSound('audios/1.mp3');
-          if (btnText == '2') playSound('audios/2.mp3');
-          if (btnText == '3') playSound('audios/3.mp3');
-          if (btnText == '4') playSound('audios/4.mp3');
-          if (btnText == '5') playSound('audios/5.mp3');
-          if (btnText == '6') playSound('audios/6.mp3');
-          if (btnText == '7') playSound('audios/7.mp3');
-          if (btnText == '8') playSound('audios/8.mp3');
-          if (btnText == '9') playSound('audios/9.mp3');
-          if (btnText == 'AC') playSound('audios/AC.mp3');
-          if (btnText == '⌫') playSound('audios/remove_digit.mp3');
-          if (btnText == '%') playSound('audios/%.mp3');
-          if (btnText == '÷') playSound('audios/div.mp3');
-          if (btnText == 'X') playSound('audios/mul.mp3');
-          if (btnText == '-') playSound('audios/-.mp3');
-          if (btnText == '+') playSound('audios/+.mp3');
-          if (btnText == '=') playSound('audios/=.mp3');
-          if (btnText == '.') playSound('audios/..mp3');
-        });
+        audioService.DelayButtonPressed(btnText, isLongEnabled);
       }
       if (!isLongEnabled) {
         if (btnText == 'AC') {
@@ -170,27 +138,7 @@ class _HomePageViewState extends State<CalculatorView> {
   void onLongPress(String btnText) {
     setState(() {
       if (isSoundEnabled) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (btnText == '0') playSound('audios/0.mp3');
-          if (btnText == '1') playSound('audios/1.mp3');
-          if (btnText == '2') playSound('audios/2.mp3');
-          if (btnText == '3') playSound('audios/3.mp3');
-          if (btnText == '4') playSound('audios/4.mp3');
-          if (btnText == '5') playSound('audios/5.mp3');
-          if (btnText == '6') playSound('audios/6.mp3');
-          if (btnText == '7') playSound('audios/7.mp3');
-          if (btnText == '8') playSound('audios/8.mp3');
-          if (btnText == '9') playSound('audios/9.mp3');
-          if (btnText == 'AC') playSound('audios/AC.mp3');
-          if (btnText == '⌫') playSound('audios/remove_digit.mp3');
-          if (btnText == '%') playSound('audios/%.mp3');
-          if (btnText == '÷') playSound('audios/div.mp3');
-          if (btnText == 'X') playSound('audios/mul.mp3');
-          if (btnText == '-') playSound('audios/-.mp3');
-          if (btnText == '+') playSound('audios/+.mp3');
-          if (btnText == '=') playSound('audios/=.mp3');
-          if (btnText == '.') playSound('audios/..mp3');
-        });
+        audioService.DelayOnLongPressed(btnText);
       }
 
       if (btnText == 'AC') {
@@ -264,6 +212,7 @@ class _HomePageViewState extends State<CalculatorView> {
   void deleteHistory(int index) {
     setState(() {
       history.removeAt(index);
+      savePreferences();
     });
   }
 

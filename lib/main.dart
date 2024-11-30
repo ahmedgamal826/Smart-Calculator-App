@@ -1,4 +1,4 @@
-import 'package:calculator_app_task1/views/splash_screen.dart';
+import 'package:calculator_app_task1/features/splash/presentation/views/splash_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +12,7 @@ class CalculatorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: SplashView(),
     );
   }
 }
