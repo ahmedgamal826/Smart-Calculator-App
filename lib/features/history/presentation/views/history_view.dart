@@ -1,4 +1,6 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:calculator_app_task1/features/history/data/models/history_model.dart';
+import 'package:calculator_app_task1/features/history/presentation/views/widgets/custom_snack_bar.dart';
 import 'package:calculator_app_task1/features/history/presentation/views/widgets/history_list.dart';
 import 'package:calculator_app_task1/features/history/presentation/views/widgets/showCardDialog.dart';
 import 'package:calculator_app_task1/features/history/presentation/views/widgets/showDeleteDialog.dart';
@@ -38,6 +40,13 @@ class _HistoryPageState extends State<HistoryView> {
           showDeleteDialog(context, () {
             widget.onDelete(index);
             setState(() {});
+
+            CustomSnackBar.show(
+              context,
+              title: 'Deleted',
+              message: 'The calculation has been deleted successfully!',
+              contentType: ContentType.success,
+            );
           });
         },
         onTapItem: (content) => showCardDialog(context, content),
